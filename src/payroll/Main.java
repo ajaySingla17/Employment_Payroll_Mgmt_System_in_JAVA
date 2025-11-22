@@ -10,7 +10,7 @@ public class Main {
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
         Admin admin = new Admin("admin", "admin123");
-        System.out.println("                                        === Employee Payroll System ===");
+        System.out.println("=== Employee Payroll System ===");
 
         if (!admin.login(sc)) {
             System.out.println("Login failed.");
@@ -24,6 +24,7 @@ public class Main {
 
         while (true) {
         System.out.println(
+            "-------------------------\n"+
             "1. Add Employee\n" +
             "2. View Employees\n" +
             "3. Edit Employee\n" +
@@ -31,7 +32,8 @@ public class Main {
             "5. Enter Salary & Calculate\n" +
             "6. Generate Salary Slips\n" +
             "7. Generate Summary Report\n" +
-            "8. Exit"
+            "8. Exit\n"+
+             "-------------------------"
         );
             System.out.print("Choose: ");
             String c = sc.nextLine().trim();
