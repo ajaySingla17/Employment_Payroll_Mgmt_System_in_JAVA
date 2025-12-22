@@ -81,7 +81,7 @@ public class ReportGenerator {
 
             Files.write(Paths.get(outCsv), lines);
             System.out.println("Summary generated: " + outCsv);
-        } catch (IOException ex) {
+        } catch (Exception ex) {
             System.err.println("Error generating summary: " + ex.getMessage());
         }
     }

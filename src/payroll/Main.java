@@ -1,12 +1,10 @@
 package payroll;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.*;
 
 public class Main {
-    private static final String EMP_CSV = "employee.csv";
-    private static final String SAL_CSV = "salary.csv";
-
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
         Admin admin = new Admin("admin", "admin123");
@@ -18,8 +16,8 @@ public class Main {
             return;
         }
 
-        EmployeeManager em = new EmployeeManager(EMP_CSV);
-        FileManager fm = new FileManager(SAL_CSV);
+        EmployeeManager em = new EmployeeManager();
+        FileManager fm = new FileManager();
         ReportGenerator rg = new ReportGenerator(fm, em);
 
         while (true) {
@@ -79,7 +77,7 @@ public class Main {
         }
     }
 
-    private static void addFlow(Scanner sc, EmployeeManager em) throws IOException {
+    private static void addFlow(Scanner sc, EmployeeManager em) throws SQLException {
         System.out.print("ID: "); String id = sc.nextLine();
         System.out.print("Name: "); String name = sc.nextLine();
         System.out.print("Designation: "); String d = sc.nextLine();
@@ -89,7 +87,7 @@ public class Main {
         em.add(new Employee(id, name, d, dep, pan, doj));
     }
 
-    private static void editFlow(Scanner sc, EmployeeManager em) throws IOException {
+    private static void editFlow(Scanner sc, EmployeeManager em) throws SQLException {
         System.out.print("ID: "); String id = sc.nextLine();
         Employee e = em.get(id);
         if (e == null) return;
@@ -102,12 +100,12 @@ public class Main {
         em.update(e);
     }
 
-    private static void delFlow(Scanner sc, EmployeeManager em) throws IOException {
+    private static void delFlow(Scanner sc, EmployeeManager em) throws SQLException {
         System.out.print("ID: "); String id = sc.nextLine();
         em.delete(id);
     }
 
-    private static void salaryFlow(Scanner sc, EmployeeManager em, FileManager fm) throws IOException {
+    private static void salaryFlow(Scanner sc, EmployeeManager em, FileManager fm) throws SQLException {
         System.out.print("Employee ID: "); String id = sc.nextLine();
         Employee e = em.get(id);
         if (e == null) return;

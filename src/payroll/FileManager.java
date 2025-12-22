@@ -1,39 +1,51 @@
 package payroll;
 
-import java.io.*;
-import java.nio.file.*;
+import java.sql.*;
 import java.util.*;
 
 public class FileManager {
-    private final Path salaryCsv;
 
-    public FileManager(String salaryCsvPath) {
-        this.salaryCsv = Paths.get(salaryCsvPath);
-        try {
-            if (!Files.exists(salaryCsv)) {
-                Files.createFile(salaryCsv);
-                Files.write(salaryCsv, Collections.singletonList("salaryId,employeeId,basic,allowance,deduction,gross,net,tax,month,year"));
-            }
-        } catch (IOException e) {
-            System.err.println("Error initializing salary CSV: " + e.getMessage());
+    public FileManager() {
+        // No initialization needed, tables are created in DatabaseManager
+    }
+
+    public synchronized void appendSalary(SalaryRecord sr) throws SQLException {
+        String sql = "INSERT INTO salaries (salaryId, employeeId, basic, allowance, deduction, gross, net, tax, month, year) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        Connection conn = DatabaseManager.getConnection();
+        if (conn == null) {
+            throw new SQLException("Database connection is null!");
+        }
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, sr.getSalaryId());
+            pstmt.setString(2, sr.getEmployeeId());
+            pstmt.setDouble(3, sr.getBasic());
+            pstmt.setDouble(4, sr.getAllowance());
+            pstmt.setDouble(5, sr.getDeduction());
+            pstmt.setDouble(6, sr.getGross());
+            pstmt.setDouble(7, sr.getNet());
+            pstmt.setDouble(8, sr.getTax());
+            pstmt.setString(9, sr.getMonth());
+            pstmt.setInt(10, sr.getYear());
+            pstmt.executeUpdate();
         }
     }
 
-    public synchronized void appendSalary(SalaryRecord sr) throws IOException {
-        Files.write(salaryCsv, Collections.singletonList(sr.toString()), StandardOpenOption.APPEND);
-    }
-
-    public List<SalaryRecord> loadAll() throws IOException {
-        List<String> lines = Files.readAllLines(salaryCsv);
+    public List<SalaryRecord> loadAll() throws SQLException {
         List<SalaryRecord> out = new ArrayList<>();
-        for (int i = 1; i < lines.size(); i++) {
-            String line = lines.get(i).trim();
-            if (line.isEmpty()) continue;
-            String[] p = line.split(",");
-            SalaryRecord sr = new SalaryRecord(p[0], p[1], Double.parseDouble(p[2]), Double.parseDouble(p[3]),
-                    Double.parseDouble(p[4]), Double.parseDouble(p[5]), Double.parseDouble(p[6]),
-                    Double.parseDouble(p[7]), p[8], Integer.parseInt(p[9]));
-            out.add(sr);
+        String sql = "SELECT * FROM salaries";
+        Connection conn = DatabaseManager.getConnection();
+        if (conn == null) {
+            throw new SQLException("Database connection is null!");
+        }
+        try (Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                SalaryRecord sr = new SalaryRecord(rs.getString("salaryId"), rs.getString("employeeId"),
+                        rs.getDouble("basic"), rs.getDouble("allowance"), rs.getDouble("deduction"),
+                        rs.getDouble("gross"), rs.getDouble("net"), rs.getDouble("tax"),
+                        rs.getString("month"), rs.getInt("year"));
+                out.add(sr);
+            }
         }
         return out;
     }
